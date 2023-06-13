@@ -1,4 +1,4 @@
-name: Basic Workflow
+name: Run Local Test and Upload Results
 on:
   push:
     branches:
@@ -16,10 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # - name: Install dependencies
-      #   run: |
-      #     yarn --frozen-lockfile
-
       - name: Install dependencies
         uses: pnpm/action-setup@v2
         with:
@@ -33,14 +29,31 @@ jobs:
         run: |
           NODE_OPTIONS=--openssl-legacy-provider pnpm webpack
 
-      - name: Run local k6 test
+      - name: Run "get-200-status-test" test
         uses: grafana/k6-action@v0.3.0
         with:
           filename: dist/get-200-status-test.js
-          flags: --out csv=results.csv
+          flags: --out csv=get-200-status-test.csv
 
-      - name: Upload performance test results
+      - name: Run "post-file-test" test
+        uses: grafana/k6-action@v0.3.0
+        with:
+          filename: dist/post-file-test.js
+          flags: --out json=post-file-test.json
+
+      - name: Run "post-400-status-test" test
+        uses: grafana/k6-action@v0.3.0
+        with:
+          # no `--out` flag, because we use custom html reporters
+          filename: dist/post-400-status-test.js
+
+      - name: Upload performance local test results
         uses: actions/upload-artifact@v3
         with:
           name: k6-report
-          path: results.csv
+          path: |
+            get-200-status-test.csv
+            post-file-test.json
+            post-400-status-test.html
+
+          if-no-files-found: error
