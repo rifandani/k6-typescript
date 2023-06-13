@@ -1,10 +1,11 @@
+name: Basic Workflow
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - main
+      - main
 
 jobs:
   k6_transpile_bundle_test:
@@ -13,16 +14,32 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      # - name: Install dependencies
+      #   run: |
+      #     yarn --frozen-lockfile
+
       - name: Install dependencies
-        run: |
-          yarn --frozen-lockfile
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          run_install: |
+            - recursive: true
+              args: [--frozen-lockfile]
 
       - name: Transpile and bundle test script
         run: |
           yarn webpack
 
       - name: Run local k6 test
-        uses: grafana/k6-action@v0.2.0
+        uses: grafana/k6-action@v0.3.0
         with:
           filename: dist/get-200-status-test.js
+          flags: --out csv=results.csv
+
+      - name: Upload performance test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: k6-report
+          path: results.csv
