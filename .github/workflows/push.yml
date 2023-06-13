@@ -29,8 +29,9 @@ jobs:
               args: [--frozen-lockfile]
 
       - name: Transpile and bundle test script
+        # Fix the ERR_OSSL_EVP_UNSUPPORTED Error
         run: |
-          yarn webpack
+          NODE_OPTIONS=--openssl-legacy-provider pnpm webpack
 
       - name: Run local k6 test
         uses: grafana/k6-action@v0.3.0
