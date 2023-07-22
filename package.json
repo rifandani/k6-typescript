@@ -22,6 +22,9 @@
     "webpack-glob-entries": "^1.0.1"
   },
   "scripts": {
-    "start": "webpack"
+    "start": "webpack",
+    "clean": "rm -rf dist",
+    "build": "set NODE_OPTIONS=--openssl-legacy-provider pnpm webpack",
+    "admin-auth": "k6 run dist/admin-auth-smoke-test.js"
   }
 }
